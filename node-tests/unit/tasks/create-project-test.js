@@ -17,7 +17,7 @@ describe('Create Project', function() {
   let createTask;
   let tasks;
 
-  function initTask(mockInitDirs = true) {
+  function initTask(options = {}) {
     tasks = [];
 
     td.replace('../../../lib/utils/require-framework', function() {
@@ -34,8 +34,8 @@ describe('Create Project', function() {
     createTask = new CreateProject({
       project: mockProject.project,
       ui: mockProject.ui,
-      cordovaId: 'io.corber.app',
-      name: 'io.corber.app'
+      cordovaId: options.cordovaId,
+      name: options.name
     });
 
     td.replace(CreateCordova.prototype, 'run', function() {
@@ -53,6 +53,7 @@ describe('Create Project', function() {
       return Promise.resolve();
     });
 
+    const mockInitDirs = 'mockInitDirs' in options ? options.mockInitDirs : true;
     if (mockInitDirs) {
       td.replace(createTask, 'initDirs', function() {
         tasks.push('create-dirs');
@@ -98,7 +99,24 @@ describe('Create Project', function() {
     return createTask.run().then(function() {
       td.verify(new CreateCordova({
         id: 'io.corber.corberMock',
-        name: 'io.corber.app',
+        name: 'corberMock',
+        templatePath: 'passedTemplatePath',
+        project: isAnything(),
+        ui: isAnything()
+      }));
+    });
+  });
+
+  it('inits CreateCordova with id, name & templatePath when a custom id and name are provided', function() {
+    let taskPath = '../../../lib/targets/cordova/tasks/create-project';
+    CreateCordova = td.replace(taskPath);
+    initTask({ cordovaId: 'io.corber.app', name: 'anAppName' });
+    createTask.templatePath = 'passedTemplatePath';
+
+    return createTask.run().then(function() {
+      td.verify(new CreateCordova({
+        id: 'io.corber.app',
+        name: 'anAppName',
         templatePath: 'passedTemplatePath',
         project: isAnything(),
         ui: isAnything()
@@ -111,7 +129,7 @@ describe('Create Project', function() {
       return ['custom'];
     });
 
-    initTask(false);
+    initTask({ mockInitDirs: false });
     let warnDouble = td.replace(createTask, 'warnCustomFramework');
 
     return createTask.run().then(function() {
@@ -147,7 +165,7 @@ describe('Create Project', function() {
         return Promise.resolve();
       });
 
-      initTask(false);
+      initTask({ mockInitDirs: false });
       return createTask.run().then(function() {
         expect(mkDirPaths).to.include(emberCdvPath);
         expect(mkDirPaths).to.include(emberCdvConfigPath);
@@ -163,7 +181,7 @@ describe('Create Project', function() {
         return Promise.resolve();
       });
 
-      initTask(false);
+      initTask({ mockInitDirs: false });
 
       return createTask.run().then(function() {
         let emberPath = path.join(

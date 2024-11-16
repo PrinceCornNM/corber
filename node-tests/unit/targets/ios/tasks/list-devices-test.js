@@ -3,15 +3,17 @@ const expect          = require('../../../../helpers/expect');
 const Device          = require('../../../../../lib/objects/device');
 const Promise         = require('rsvp').Promise;
 
-const spawnArgs       = ['/usr/bin/instruments', ['-s', 'devices']];
+const spawnArgs       = ['/usr/bin/xctrace', ['list', 'devices']];
 
 //yes - isleofcode.com is my actual device name
 //(turn on the hotspot and be branding all conference long!)
-const deviceList = `Known Devices
-Alex’s MacBook Pro (2) [uuid]
-isleofcode.com (12.1.2) [uuid]
-Apple TV (12.1) [uuid] (Simulator)
-iPhone X (12.1) [uuid] (Simulator)`
+const deviceList = `== Devices ==
+MacBook Pro (Tomasz) (uuid)
+isleofcode.com (12.1.2) (uuid)
+
+== Simulators ==
+Apple TV Simulator (12.1) (uuid)
+iPhone X Simulator (12.1) (uuid)`
 
 describe('iOS List Emulator Task', () => {
   let listDevices;
